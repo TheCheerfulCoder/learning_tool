@@ -4,7 +4,8 @@
   "description": "Sample Node.js (Express) app for AWS Elastic Beanstalk",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "devStart": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -13,5 +14,8 @@
   "license": "MIT-0",
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
