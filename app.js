@@ -60,7 +60,7 @@ app.get("/:routeName/:departureTime", (req, res) => {
 
     // Send the result to the user
     res.send(
-      `{“routeName”: ${routeName}, “departureTime": ${departureTime}, "estimatedArrivalTime": ${estimatedArrivalTime}}`
+      `{"routeName": "${routeName}", "departureTime": "${departureTime}", "estimatedArrivalTime": "${estimatedArrivalTime}"}`
     );
   } catch {
     res.status(500).send("ERROR: 500 Internal Server Error");
