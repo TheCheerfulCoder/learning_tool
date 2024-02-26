@@ -1,12 +1,34 @@
-# AWS Elastic Beanstalk Node.js Sample App
+# Ferry Arrival Time Estimator Microservice
 
-This repository contains a sample Node.js web application built using [Express](https://expressjs.com/), meant to be used as part of the AWS DevOps Learning Path.
+This repository contains a HTTP-based microservice that returns the estimated arrival time of a Washington-state ferry given the departure time and the route name. Below are the current routes and their route names:
+* "SEA-BR": Seattle to Bremerton
+*  "SEA-BI": Seattle to Bainbridge Island
+*  "ED-KING": Edmonds to Kingston
+*  "MUK-CL": Mukilteo to Clinton
 
-## Security
+## How To Programmatically Request & Receive Data
 
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+After the root URL (http://learningtool-env.eba-gmtn2kim.us-west-2.elasticbeanstalk.com), the page accepts two dynamic parameters. The first is the route name, which are listed above. The second is the departure time in military time. See an example of this below in Python.
 
-## License
+```
+import json
+import urllib.request
+from urllib.request import urlopen
 
-This library is licensed under the MIT-0 License. See the LICENSE file.
+with urllib.request.urlopen(
+    "http://learningtool-env.eba-gmtn2kim.us-west-2.elasticbeanstalk.com/SEA-BR/1100"
+    ) as url:
+    data = json.load(url)
+    print(data)
+    print(data['departureTime'])
+
+CONSOLE:
+{'routeName': 'SEA-BR', 'departureTime': '1100', 'estimatedArrivalTime': '1160'}
+1100
+```
+
+## UML Sequence Diagram
+![alt text](FerryMicroserviceUML.png)
+
+
 
