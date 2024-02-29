@@ -1,6 +1,7 @@
 const { secureHeapUsed } = require('crypto');
 const express = require('express');
 const path = require('path');
+const { stringify } = require('querystring');
 const app = express();
 const port = 8080;
 const ferryRoutes = {
@@ -17,54 +18,52 @@ app.get("/", function (req, res) {
 });
 
 app.get("/:routeName/:departureTime", (req, res) => {
-  try {
-    var routeName = req.params.routeName;
-    var departureTime = req.params.departureTime;
-    var scheduledArrivalTime = req.params.scheduledArrivalTime;
+  // try {
+  var routeName = req.params.routeName;
+  var departureTime = req.params.departureTime;
 
-    // Check if the routeName is valid
-    if (!ferryRoutes.hasOwnProperty(routeName)) {
-      res.send(`ERROR: ${routeName} is an invalid or unsupported route`);
-    }
-
-    // Check if the departureTime is valid
-    const militaryTimeRegex = new RegExp(/^[0-2][0-9][0-9][0-9]$/);
-    if (!militaryTimeRegex.test(departureTime) || (Number(departureTime > 2400))) {
-      res.send(`ERROR: "${departureTime}" is an invalid time format`);
-    }
-
-    // Calculate the estimated arrival time
-    departureTime = Number(departureTime);
-    scheduledArrivalTime = Number(scheduledArrivalTime);
-
-    routeLength = ferryRoutes[routeName];
-    estimatedArrivalTime = departureTime + routeLength;
-
-    if (estimatedArrivalTime > 2400) {
-      estimatedArrivalTime = estimatedArrivalTime - 2400;
-    }
-
-    // Add preceding zeroes
-    if (estimatedArrivalTime < 1000) {
-      estimatedArrivalTime = 0 + estimatedArrivalTime.toString()
-    }
-    if (departureTime < 1000) {
-      departureTime = 0 + departureTime.toString();
-    }
-    if (estimatedArrivalTime < 100) {
-      estimatedArrivalTime = 00 + estimatedArrivalTime.toString();
-    }
-    if (departureTime < 100) {
-      departureTime = 00 + departureTime.toString();
-    }
-
-    // Send the result to the user
-    res.send(
-      `{"routeName": "${routeName}", "departureTime": "${departureTime}", "estimatedArrivalTime": "${estimatedArrivalTime}"}`
-    );
-  } catch {
-    res.status(500).send("ERROR: 500 Internal Server Error");
+  // Check if the routeName is valid
+  if (!ferryRoutes.hasOwnProperty(routeName)) {
+    res.send(`ERROR: ${routeName} is an invalid or unsupported route`);
   }
+
+  // Check if the departureTime is valid
+  const militaryTimeRegex = new RegExp(/^[0-2][0-9][0-5][0-9]$/);
+  if (!militaryTimeRegex.test(departureTime) || Number(departureTime > 2400)) {
+    res.send(`ERROR: "${departureTime}" is an invalid time format`);
+  }
+
+  // Calculate the estimated arrival time
+  const departureHour = Number(departureTime.slice(0, 2));
+  const departureMin = Number(departureTime.slice(2, 4));
+
+  const routeLength = ferryRoutes[routeName];
+  departureTimeObj = new Date(0, 0, 0, departureHour, departureMin, 0, 0);
+  var estimatedArrivalTime = new Date(
+    departureTimeObj.getTime() + routeLength * 60 * 1000
+  );
+
+  // Get the estimated arrival time in military time
+  var estimatedArrivalHour = estimatedArrivalTime.getHours();
+  var estimatedArrivalMin = estimatedArrivalTime.getMinutes();
+
+  if (estimatedArrivalHour.toString().length < 2) {
+    estimatedArrivalHour = "0" + estimatedArrivalHour.toString();
+  }
+  if (estimatedArrivalMin.toString().length < 2) {
+    estimatedArrivalMin = "0" + estimatedArrivalMin.toString();
+  }
+  
+  estimatedArrivalTime =
+    estimatedArrivalHour.toString() + estimatedArrivalMin.toString();
+
+  // Send the result to the user
+  res.send(
+    `{"routeName": "${routeName}", "departureTime": "${departureTime}", "estimatedArrivalTime": "${estimatedArrivalTime}"}`
+  );
+  // } catch {
+  //   res.status(500).send("ERROR: 500 Internal Server Error");
+  // }
 });
 
 app.listen(port);
